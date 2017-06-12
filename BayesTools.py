@@ -12,30 +12,41 @@ class BayesTools:
         window.title("bayes")
         btnSelectTrainingSet = Tkinter.Button(
             window, text="选择训练集", command=self.selectTrainingSet)
+        self.textTrainingFile = Tkinter.Text(window, width=30, height=5)
+        self.textTrainingFile.insert(Tkinter.END, "训练集：")
         btnSelectTestingSet = Tkinter.Button(
             window, text="选择测试集", command=self.selectTestingSet)
+        self.textTestingFile = Tkinter.Text(window, width=30, height=5)
+        self.textTestingFile.insert(Tkinter.END, "测试集：")
         btnStart = Tkinter.Button(window, text="开始", command=self.start)
+        self.textResult = Tkinter.Text(window, width=50, height=15)
+        self.textResult.insert(Tkinter.END, "预测结果：\n")
         btnSelectTrainingSet.pack()
+        self.textTrainingFile.pack()
         btnSelectTestingSet.pack()
+        self.textTestingFile.pack()
         btnStart.pack()
+        self.textResult.pack()
         window.mainloop()
 
     def selectTrainingSet(self):
         self.fileNameForTraining = tkFileDialog.askopenfilename(initialdir='/')
+        self.textTrainingFile.insert(Tkinter.END, self.fileNameForTraining)
         print self.fileNameForTraining
 
     def selectTestingSet(self):
         self.fileNameForTesting = tkFileDialog.askopenfilename(initialdir='/')
+        self.textTestingFile.insert(Tkinter.END, self.fileNameForTesting)
         print self.fileNameForTesting
 
     def start(self):
-        attnum = 5  # attribute number
+        attnum = 5
         attrname = ['content_similar', 'figure_url', 'figure_jing',
-                    'follow_ratio', 'average_repost']  # attribute name
+                    'follow_ratio', 'average_repost']
         # baseline that divide attribute number into high part and low part
         baseline = [13, 0.4, 0.6, 10, 5]
-        group_num = 10  # group number
-        accuary = 0.0  # average accuary
+        group_num = 10
+        accuary = 0.0
         Sensitivity = 0.0
         Specificity = 0.0
 
@@ -59,6 +70,8 @@ class BayesTools:
 
         for i in range(attnum):
             print(attlist[i].name, attlist[i].baseline)
+            self.textResult.insert(
+                Tkinter.END, "属性：" + attlist[i].name + " 基准值：" + str(attlist[i].baseline) + "\n")
 
         rownum = 1
         with open(self.fileNameForTraining, 'r') as csvfile:
@@ -127,9 +140,15 @@ class BayesTools:
                     fp = fp + 1
                 elif ps >= pns and is_spam == "no":
                     fn = fn + 1
-                predict_right = tp + tn
-                predict_wrong = fp + fn
+            predict_right = tp + tn
+            predict_wrong = fp + fn
+            self.textResult.insert(
+                Tkinter.END, "tp:" + str(tp) + " tn:" + str(tn) + "\n")
+            self.textResult.insert(
+                Tkinter.END, "fp:" + str(fp) + " fn:" + str(fn) + "\n")
             print(predict_right, predict_wrong)
+            self.textResult.insert(
+                Tkinter.END, "预测正确次数：" + str(predict_right) + " 预测错误次数：" + str(predict_wrong) + "\n")
             accuary = 1.0 * predict_right / \
                 (predict_right + predict_wrong) + accuary
             Sensitivity = 1.0 * tp / (tp + fn) + Sensitivity
@@ -138,6 +157,12 @@ class BayesTools:
         print("accuary", accuary / group_num)
         print("sensitivity", Sensitivity / group_num)
         print("specificity", Specificity / group_num)
+        self.textResult.insert(Tkinter.END, "accuary:" +
+                               str(accuary / group_num) + "\n")
+        self.textResult.insert(Tkinter.END, "sensitity:" +
+                               str(Sensitivity / group_num) + "\n")
+        self.textResult.insert(
+            Tkinter.END, "specificity:" + str(Specificity / group_num) + "\n")
 
 
 BayesTools()
